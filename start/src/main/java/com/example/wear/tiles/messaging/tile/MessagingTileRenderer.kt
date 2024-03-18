@@ -17,6 +17,7 @@ package com.example.wear.tiles.messaging.tile
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -149,10 +150,15 @@ private fun contactLayout(
 @WearDevicePreview
 @Composable
 fun MessagingTileRendererPreview() {
+    val state = MessagingTileState(MessagingRepo.knownContacts)
+    val context = LocalContext.current
     TileLayoutPreview(
-        state = MessagingTileState(MessagingRepo.knownContacts),
-        resourceState = emptyMap(),
-        renderer = MessagingTileRenderer(LocalContext.current)
+        state = state,
+        resourceState = mapOf(
+            state.contacts[1] to (context.getDrawable(R.drawable.ali) as BitmapDrawable).bitmap,
+            state.contacts[2] to (context.getDrawable(R.drawable.taylor) as BitmapDrawable).bitmap,
+        ),
+        renderer = MessagingTileRenderer(context)
     )
 }
 
