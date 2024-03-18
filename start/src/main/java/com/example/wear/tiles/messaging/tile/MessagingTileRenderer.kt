@@ -24,14 +24,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.wear.tiles.ColorBuilders
 import androidx.wear.tiles.DeviceParametersBuilders
 import androidx.wear.tiles.LayoutElementBuilders
+import androidx.wear.tiles.ModifiersBuilders
+import androidx.wear.tiles.ModifiersBuilders.Clickable
 import androidx.wear.tiles.ResourceBuilders
+import androidx.wear.tiles.material.Button
+import androidx.wear.tiles.material.ButtonColors
+import androidx.wear.tiles.material.ChipColors
+import androidx.wear.tiles.material.CompactChip
 import androidx.wear.tiles.material.Text
 import androidx.wear.tiles.material.Typography
+import androidx.wear.tiles.material.layouts.MultiButtonLayout
 import androidx.wear.tiles.material.layouts.PrimaryLayout
 import com.example.wear.tiles.R
 import com.example.wear.tiles.messaging.Contact
 import com.example.wear.tiles.messaging.MessagingRepo
+import com.example.wear.tiles.tools.IconSizePreview
 import com.example.wear.tiles.tools.WearDevicePreview
+import com.example.wear.tiles.tools.emptyClickable
+import com.google.android.horologist.compose.tools.LayoutElementPreview
 import com.google.android.horologist.compose.tools.TileLayoutPreview
 import com.google.android.horologist.tiles.images.drawableResToImageResource
 import com.google.android.horologist.tiles.images.toImageResource
@@ -81,13 +91,60 @@ private fun messagingTileLayout(
     state: MessagingTileState
 ) = PrimaryLayout.Builder(deviceParameters)
     .setContent(
-        Text.Builder(context, context.getString(R.string.hello_tile_body))
-            .setTypography(Typography.TYPOGRAPHY_BODY1)
-            .setColor(ColorBuilders.argb(Color.White.toArgb()))
+        // MultiButtonLayout은 버튼을 최대 7개 지원하고 적절한 간격으로 배치합니다.
+        MultiButtonLayout.Builder()
+            .apply {
+                // In a PrimaryLayout with a compact chip at the bottom, we can fit 5 buttons.
+                // We're only taking the first 4 contacts so that we can fit a Search button too.
+                state.contacts.take(4).forEach{ contact ->
+                    addButtonContent(
+                        contactLayout(
+                            context = context,
+                            contact = contact,
+                            clickable = emptyClickable
+                        )
+                    )
+                }
+            }
+            .addButtonContent(searchLayout(context, emptyClickable))
+            .build()
+    )
+    .setPrimaryChipContent(
+        CompactChip.Builder(
+            context,
+            context.getString(R.string.tile_messaging_create_new),
+            emptyClickable,
+            deviceParameters
+        )
+            .setChipColors(ChipColors.primaryChipColors(MessagingTileTheme.colors))
             .build()
     )
     .build()
 
+private fun searchLayout(
+    context: Context,
+    clickable: ModifiersBuilders.Clickable,
+) = Button.Builder(context, clickable)
+    .setContentDescription(context.getString(R.string.tile_messaging_search))
+    .setIconContent(MessagingTileRenderer.ID_IC_SEARCH)
+    .setButtonColors(ButtonColors.secondaryButtonColors(MessagingTileTheme.colors))
+    .build()
+
+private fun contactLayout(
+    context: Context,
+    contact: Contact,
+    clickable: ModifiersBuilders.Clickable,
+) = Button.Builder(context, clickable)
+    .setContentDescription(contact.name)
+    .apply {
+        if(contact.avatarUrl != null) {
+            setImageContent(contact.imageResourceId())
+        } else {
+            setTextContent(contact.initials)
+            setButtonColors(ButtonColors.secondaryButtonColors(MessagingTileTheme.colors))
+        }
+    }
+    .build()
 
 @WearDevicePreview
 @Composable
@@ -97,4 +154,20 @@ fun MessagingTileRendererPreview() {
         resourceState = emptyMap(),
         renderer = MessagingTileRenderer(LocalContext.current)
     )
+}
+
+@IconSizePreview
+@Composable
+private fun SearchButtonPreview() {
+    LayoutElementPreview(
+        searchLayout(
+            context = LocalContext.current,
+            clickable = emptyClickable
+        )
+    ) {
+        addIdToImageMapping(
+            MessagingTileRenderer.ID_IC_SEARCH,
+            drawableResToImageResource(R.drawable.ic_search_24)
+        )
+    }
 }
