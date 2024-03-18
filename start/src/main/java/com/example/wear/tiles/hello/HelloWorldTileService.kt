@@ -15,12 +15,14 @@
  */
 package com.example.wear.tiles.hello
 
+import androidx.wear.tiles.DimensionBuilders
 import androidx.wear.tiles.LayoutElementBuilders
 import androidx.wear.tiles.LayoutElementBuilders.LayoutElement
 import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.ResourceBuilders
 import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TimelineBuilders
+import com.example.wear.tiles.R
 import com.google.android.horologist.tiles.CoroutinesTileService
 
 private const val RESOURCES_VERSION = "0"
@@ -57,6 +59,16 @@ class HelloWorldTileService : CoroutinesTileService() {
     }
 
     private fun tileLayout(): LayoutElement {
-        TODO()
+        val text = getString(R.string.hello_tile_body)
+        return LayoutElementBuilders.Box.Builder()
+            .setVerticalAlignment(LayoutElementBuilders.VERTICAL_ALIGN_CENTER)
+            .setWidth(DimensionBuilders.expand())
+            .setHeight(DimensionBuilders.expand())
+            .addContent(
+                LayoutElementBuilders.Text.Builder()
+                    .setText(text)
+                    .build()
+            )
+            .build()
     }
 }
