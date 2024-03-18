@@ -58,7 +58,8 @@ class MessagingTileRenderer(context: Context) :
         return messagingTileLayout(
             context = context,
             deviceParameters = deviceParameters,
-            state = state
+            state = state,
+            searchButtonClickable = launchActivityClickable("search_button", openSearch())
         )
     }
 
@@ -89,7 +90,8 @@ class MessagingTileRenderer(context: Context) :
 private fun messagingTileLayout(
     context: Context,
     deviceParameters: DeviceParametersBuilders.DeviceParameters,
-    state: MessagingTileState
+    state: MessagingTileState,
+    searchButtonClickable: ModifiersBuilders.Clickable
 ) = PrimaryLayout.Builder(deviceParameters)
     .setContent(
         // MultiButtonLayout은 버튼을 최대 7개 지원하고 적절한 간격으로 배치합니다.
@@ -107,7 +109,7 @@ private fun messagingTileLayout(
                     )
                 }
             }
-            .addButtonContent(searchLayout(context, emptyClickable))
+            .addButtonContent(searchLayout(context, searchButtonClickable))
             .build()
     )
     .setPrimaryChipContent(
